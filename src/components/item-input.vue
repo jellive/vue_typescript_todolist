@@ -9,22 +9,24 @@
 </template>
 
 <script lang="ts">
-import {Vue, Component} from 'vue-property-decorator'
-import {mapState} from 'vuex' // state 헬퍼 함수. 바로 부를 수 있음.
+import {Vue, Component} from 'vue-property-decorator';
+import {mapState} from 'vuex'; // state 헬퍼 함수. 바로 부를 수 있음.
 
 @Component({
     computed: mapState([
-        'todoList'
-    ])
+        'todoList',
+    ]),
 })
 export default class ItemInput extends Vue {
-    title: string = ''
+    title: string = '';
+    todoList!: any[]
+
     addItem() {
         this.$store.commit('addItem', {
-            id: this.$store.state.todoList.length,
+            id: this.todoList.length,
             title: this.title,
-            status: 'active'
-        })
+            status: 'active',
+        });
     }
 }
 </script>

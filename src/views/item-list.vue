@@ -8,12 +8,12 @@
 import {
     Vue,
     Component,
-    Watch
-} from 'vue-property-decorator'
-import item from '@/components/item.vue'
+    Watch,
+} from 'vue-property-decorator';
+import item from '@/components/item.vue';
 import {
-    mapGetters
-} from 'vuex' // getters 헬퍼 함수. $store를 쓰지 않고 바로 부를 수 있다.
+    mapGetters,
+} from 'vuex'; // getters 헬퍼 함수. $store를 쓰지 않고 바로 부를 수 있다.
 
 @Component({
     components: {
@@ -23,36 +23,40 @@ import {
         ...mapGetters([
             'allTodoList',
             'activeTodoList',
-            'clearTodoList'
-        ])
-    }
+            'clearTodoList',
+        ]),
+    },
 })
 export default class ItemList extends Vue {
-    renderList: any[] = []
+    renderList: any[] = [];
+    allTodoList!: any[] // mapGetters는 런타임에 할당하기 떄문에 lint 에러가 나온다. 이를 해제하기 위함.
+    activeTodoList!: any[]
+    clearTodoList!: any[]
 
-    created() {
-        // this.renderList = this.allTodoList // 초기부터 넣으면 비동기인 getters가 불리기 전에 렌더링이 완료되서 undefined로 간다. created안에 값을 넣어줘야 함.
-        this.initRenderList(this.$route.params.status as 'active' | 'clear')
+
+    async created() {
+        this.$store.dispatch('initData');
     }
 
-    initRenderList(status: 'active' | 'clear') {
+    initRenderList(status: string) {
         if (!status) {
-            this.renderList = this.allTodoList
+            this.renderList = this.allTodoList;
         } else if (status === 'active') {
-            this.renderList = this.activeTodoList
+            this.renderList = this.activeTodoList;
         } else if (status === 'clear') {
-            this.renderList = this.clearTodoList
+            this.renderList = this.clearTodoList;
         }
     }
 
     @Watch('$route.params.status')
     routeUpdate(newValue: 'active' | 'clear') {
-        this.initRenderList(newValue)
+        this.initRenderList(newValue);
     }
 
     @Watch('$store.state.todoList', {deep: true})
-    routeUpdate() {
-        this.initRenderList(this.$route.params.status)
+    stateUpdate() {
+        const status: string = this.$route.params.status
+        this.initRenderList(status);
     }
 }
 </script>
