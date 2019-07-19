@@ -2,7 +2,7 @@
   <div id="app">
     <appHeader/>
     <item-input/>
-    <item/>
+    <router-view/>
   </div>
 </template>
 
@@ -10,12 +10,11 @@
 import {Vue, Component} from 'vue-property-decorator'
 import appHeader from '@/components/header.vue' // 그냥 header를 쓰면 원래 기본으로 있는 header태그와 겹쳐서 이름 바꿈.
 import itemInput from '@/components/item-input.vue'
-import item from '@/components/item.vue'
 
 
 @Component({
   components: {
-    appHeader, itemInput, item
+    appHeader, itemInput
   }
 })
 export default class App extends Vue {
