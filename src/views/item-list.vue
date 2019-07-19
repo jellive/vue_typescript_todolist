@@ -1,36 +1,58 @@
 <template>
 <div>
-    <item v-for="item in renderList" :id="item.id" :title="item.title" :status="item.status"/>
+    <item v-for="item in renderList" :id="item.id" :title="item.title" :status="item.status" :key="item.id" />
 </div>
 </template>
 
 <script lang="ts">
-import {Vue, Component, Watch} from 'vue-property-decorator'
+import {
+    Vue,
+    Component,
+    Watch
+} from 'vue-property-decorator'
 import item from '@/components/item.vue'
+import {
+    mapGetters
+} from 'vuex' // getters 헬퍼 함수. $store를 쓰지 않고 바로 부를 수 있다.
 
 @Component({
     components: {
         item,
+    },
+    computed: {
+        ...mapGetters([
+            'allTodoList',
+            'activeTodoList',
+            'clearTodoList'
+        ])
     }
 })
 export default class ItemList extends Vue {
-    data: any[] = [
-        {id: 0, title: 'test', status: 'active'},
-        {id: 1, title: 'test1', status: 'clear'},
-        {id: 2, title: 'test2', status: 'active'}
-    ]
+    renderList: any[] = []
 
-    renderList: any[] = this.data
+    created() {
+        // this.renderList = this.allTodoList // 초기부터 넣으면 비동기인 getters가 불리기 전에 렌더링이 완료되서 undefined로 간다. created안에 값을 넣어줘야 함.
+        this.initRenderList(this.$route.params.status as 'active' | 'clear')
+    }
+
+    initRenderList(status: 'active' | 'clear') {
+        if (!status) {
+            this.renderList = this.allTodoList
+        } else if (status === 'active') {
+            this.renderList = this.activeTodoList
+        } else if (status === 'clear') {
+            this.renderList = this.clearTodoList
+        }
+    }
 
     @Watch('$route.params.status')
-    routeUpdate(newValue: string) {
-        if (!newValue) {
-            this.renderList = this.data
-        } else if (newValue === 'active' || newValue === 'clear'){
-            this.renderList = this.data.slice().filter((item: any) => {
-                return item.status === newValue
-            })
-        }
+    routeUpdate(newValue: 'active' | 'clear') {
+        this.initRenderList(newValue)
+    }
+
+    @Watch('$store.state.todoList', {deep: true})
+    routeUpdate() {
+        this.initRenderList(this.$route.params.status)
     }
 }
 </script>
